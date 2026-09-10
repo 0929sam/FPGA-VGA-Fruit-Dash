@@ -17,9 +17,17 @@
 所有角色與道具都不是幾何圖形，而是**真實照片經 Python 轉檔成 12-bit RGB444 點陣圖**，
 燒錄進 Quartus 的 ROM IP（altsyncram）後，由 RTL 即時讀出繪製在螢幕上，並用去背色做透明合成。
 
-這門課是「可程式化晶片設計」課程作業，專案重點在練習：VGA 時序與 FSM 遊戲狀態機設計、
-簡易物理引擎（重力/位移）、LFSR 偽亂數與動態難度調配、點陣圖 ROM 讀取與去背渲染、
-以及可重用的 2D 七段顯示器繪圖工具模組。
+VGA 時序與 FSM 遊戲狀態機、簡易物理引擎、LFSR 動態難度調配、點陣圖 ROM 去背渲染、以及可重用的
+2D 七段顯示器繪圖工具模組——這些都是自己額外鑽研、自主學習補上的，不是課堂內容直接教的東西。
+
+### 🏆 專案亮點
+
+- 🎮 完整遊戲迴圈：START 選單 → PLAY 遊戲進行 → GAMEOVER 結算與排行榜
+- 🏃 手刻物理引擎：拋物線重力跳躍 + 下沿偵測觸發的瞬間衝刺位移
+- 🎲 動態難度系統：16-bit LFSR 偽亂數驅動掉落物種類/軌道，速度與炸彈機率隨等級即時調高
+- 🖼️ 真實照片轉點陣圖：12-bit RGB444 ROM + 磁紅色去背，讓角色道具無縫疊在背景上
+- 🔍 內嵌 SignalTap 邏輯分析儀節點，可即時擷取 VGA 時序與按鍵訊號除錯
+- 🏆 跨局保存的前五名排行榜，結算畫面依名次彩色分階顯示
 
 ---
 
@@ -43,32 +51,38 @@
 
 ```mermaid
 flowchart TB
-    CLK["CLOCK_50 (50MHz)"] --> PLL["clk_gen (PLL)"]
-    PLL --> VC["VGA_CLK (25.175MHz)"]
-    VC --> FSM["TOP.v\nH/V sync + 遊戲狀態機\n(START / PLAY / GAMEOVER)"]
+    subgraph S1[" 時脈與畫面時序 "]
+        direction LR
+        C0(["CLOCK_50\n50MHz"]) --> C1[clk_gen\nPLL] --> C2(["VGA_CLK\n25.175MHz"])
+    end
 
-    KEY["KEY0-3\n右 / 左 / 衝刺 / 跳"] --> PC["player_ctrl\n位移 + 重力跳躍 + 衝刺物理"]
-    FSM -- frame_pulse --> PC
+    C2 --> FSM[TOP.v\nH/V sync 計數器 + 遊戲狀態機\nSTART → PLAY → GAMEOVER]
 
-    LFSR["lfsr_16\n16-bit 偽亂數"] --> IM["item_manager\n掉落物軌道/種類/速度/難度"]
-    FSM -- frame_pulse --> IM
+    subgraph S2[" 輸入與亂數來源 "]
+        direction LR
+        KEY(["KEY0-3\n右 / 左 / 衝刺 / 跳"])
+        LFSR[lfsr_16\n16-bit 偽亂數]
+    end
 
-    PC -- player_x, player_y --> HIT["AABB 碰撞偵測\n加分 / 扣血 / 加秒"]
+    FSM -- frame_pulse --> PC[player_ctrl\n位移 + 重力跳躍 + 衝刺物理]
+    FSM -- frame_pulse --> IM[item_manager\n掉落軌道/種類/速度/難度]
+    KEY --> PC
+    LFSR --> IM
+
+    PC -- player_x, player_y --> HIT{{AABB 碰撞偵測}}
     IM -- lane, type, y_pos --> HIT
 
-    HIT --> STATE["分數 s0-s3 / HP / 倒數時間 / 前五名排行榜 h1-h5"]
+    HIT -- 加分 / 扣血 / 加秒 --> STATE[("分數 s0-s3 / HP / 倒數時間\n前五名排行榜 h1-h5")]
 
-    subgraph ROM["Sprite ROM IP（altsyncram，12-bit RGB444）"]
-        R1["apple / banana / bomb / clock / people\n(.v + .mif，真實照片轉檔)"]
-    end
+    ROM[("Sprite ROM IP\naltsyncram，12-bit RGB444\napple/banana/bomb/clock/people")]
     PC -.player 位置.-> ROM
     IM -.item 位置/種類.-> ROM
 
-    ROM -- 12-bit 色彩\n磁紅色=去背 --> RENDER["色彩渲染 + 去背合成\n(天空/草地背景)"]
-    STATE --> BCD["bcd_to_7seg +\nvga_osd_digit\n(可重用 2D 七段繪圖器)"]
-    BCD --> HEX["HEX0-3\n實體七段顯示器"]
-    BCD --> RENDER
-    RENDER --> OUT["VGA_R/G/B\nVGA_HS/VS"]
+    ROM -- 磁紅色=去背 --> RENDER[色彩渲染 + 去背合成\n天空/草地背景]
+    STATE --> DIGIT[bcd_to_7seg +\nvga_osd_digit\n可重用 2D 七段繪圖器]
+    DIGIT --> HEX(["HEX0-3\n實體七段顯示器"])
+    DIGIT --> RENDER
+    RENDER --> OUT(["VGA_R/G/B\nVGA_HS/VS"])
 ```
 
 ### 模組說明 (Module Breakdown)
@@ -132,11 +146,9 @@ flowchart TB
 
 ## 📹 實機 Demo 影片
 
-開頭的動圖是實機錄影剪出來的 6 秒精華（自動播放）。完整版影片如下，GitHub 網頁不會內嵌播放，
-點進去後要按 `View raw` 下載到本機用播放器看：
-- [docs/media/IMG_8431.mp4](docs/media/IMG_8431.mp4)（已壓縮，約 9MB）
-- [docs/media/IMG_8434.mov](docs/media/IMG_8434.mov)（原始檔約 39MB）
-- [docs/media/IMG_8435.mov](docs/media/IMG_8435.mov)（原始檔約 23MB）
+- [docs/media/IMG_8431.mp4](docs/media/IMG_8431.mp4)
+- [docs/media/IMG_8434.mov](docs/media/IMG_8434.mov)
+- [docs/media/IMG_8435.mov](docs/media/IMG_8435.mov)
 
 ---
 
@@ -162,6 +174,17 @@ FPGA-VGA-Fruit-Dash/
 
 ---
 
+## 🔭 已知限制與未來規劃 (Known Limitations & Future Work)
+
+- **排行榜不會斷電保存**：`h1`~`h5` 是暫存器，只在板子通電期間有效，重新燒錄或斷電就會清空；
+  之後可以接 EEPROM/Flash 做真正跨電源的持久化儲存
+- **分數用獨立 BCD 位數暫存器手動進位**：目前 `s0`~`s3` 各自處理進位邏輯，之後可以改用通用的
+  Double Dabble（shift-add-3）演算法，讓二進位轉 BCD 更容易擴充位數
+- **缺少對應目前腳位的 testbench**：手上原本的模擬環境是舊版介面留下來的，跟現在的 `TOP.v`
+  埠列對不上，之後想加自動化驗證的話需要重寫一份
+
+---
+
 ## 🔧 如何開啟專案 (How to Open in Quartus)
 
 1. 安裝 [Intel Quartus Prime](https://www.intel.com/content/www/us/en/software-kit/programmable/quartus-prime/prime-lite.html)（Lite 版即可，需支援 Cyclone V）
@@ -173,4 +196,6 @@ FPGA-VGA-Fruit-Dash/
 
 ## 👤 作者 (Author)
 
-可程式化晶片設計課程作業 — Fruit Dash 生存遊戲
+**CHEN SHUO HU**
+
+RTL、VGA 時序、遊戲邏輯與素材轉檔管線皆為個人獨立設計與實作。
