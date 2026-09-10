@@ -1,20 +1,27 @@
+// =============================================================
+// player_ctrl：主角位移與簡易重力物理引擎
+//   - 左右移動：按住方向鍵時，每個 frame_pulse 位移 MOVE_SPEED 像素
+//   - 衝刺：偵測 KEY2 下沿觸發一次性瞬移 DASH_DIST 像素，並做邊界保護
+//   - 跳躍：按下 KEY3 給予負向初速 y_vel，之後每幀疊加重力直到落地
+//     （螢幕座標 y 軸向下為正，因此負的 y_vel 代表往上）
+// =============================================================
 module player_ctrl(
-    input        clk,           
-    input        rst_n,         
-    input        frame_pulse,   
+    input        clk,
+    input        rst_n,
+    input        frame_pulse,
     input        key_left,      // KEY1
     input        key_right,     // KEY0
     input        key_jump,      // KEY3
-    input        key_dash,      // KEY2 【新增衝刺控制端】
-    
-    output reg [9:0] player_x,  
-    output reg [9:0] player_y   
+    input        key_dash,      // KEY2
+
+    output reg [9:0] player_x,
+    output reg [9:0] player_y
 );
 
-    parameter GROUND_Y   = 10'd400; 
-    parameter PLAYER_W   = 10'd32;  
-    parameter MOVE_SPEED = 10'd5;   
-    parameter DASH_DIST  = 10'd40;  // 【新增】衝刺距離：40像素 (剛好半條軌道間距)
+    parameter GROUND_Y   = 10'd400;
+    parameter PLAYER_W   = 10'd32;
+    parameter MOVE_SPEED = 10'd5;
+    parameter DASH_DIST  = 10'd40;  // 衝刺距離：40 像素（剛好半條軌道間距）
     
     reg is_jumping;
     reg signed [10:0] y_vel;    
@@ -71,15 +78,16 @@ module player_ctrl(
                     player_x <= player_x + MOVE_SPEED;
             end
 
-            // 3. 跳躍與重力 (保持不變)
+            // 3. 跳躍與重力：按下瞬間給一個向上初速，之後每幀重力 +1，
+            //    直到算出的新 y 超過地面高度就視為落地、歸零速度
             if (!is_jumping) begin
                 if (!key_jump) begin
                     is_jumping <= 1'b1;
-                    y_vel      <= -11'd15; 
+                    y_vel      <= -11'd15;
                 end
-            end 
+            end
             else begin
-                y_vel <= y_vel + 11'd1; 
+                y_vel <= y_vel + 11'd1;
                 if ( ($signed({1'b0, player_y}) + y_vel) >= $signed({1'b0, GROUND_Y}) ) begin
                     player_y   <= GROUND_Y; 
                     is_jumping <= 1'b0;     

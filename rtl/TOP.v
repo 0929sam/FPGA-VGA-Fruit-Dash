@@ -3,7 +3,7 @@ module TOP(
     input            reset_n,     
     input            KEY0,        // 右
     input            KEY1,        // 左
-    input            KEY2,        // 【新增回腳位清單】遊戲操作：瞬間衝刺位移 / 選單：任意鍵
+    input            KEY2,        // 衝刺
     input            KEY3,        // 跳躍
     
     output [6:0]     HEX0, HEX1, HEX2, HEX3,
@@ -100,24 +100,26 @@ module TOP(
     end
 
     // =========================================================
-    //  3. 實體化玩家控制端【接入 KEY2】
+    //  3. 實體化玩家控制端
     // =========================================================
     wire [9:0] player_x, player_y;
     player_ctrl u_player (
-        .clk(VGA_CLK), .rst_n(reset_n && !soft_reset), 
+        .clk(VGA_CLK), .rst_n(reset_n && !soft_reset),
         .frame_pulse(frame_pulse && (current_state == STATE_PLAY)),
         .key_left(KEY1), .key_right(KEY0), .key_jump(KEY3),
-        .key_dash(KEY2), // 【這裡把實體 KEY2 綁定進去端點】
+        .key_dash(KEY2),
         .player_x(player_x), .player_y(player_y)
     );
 
     // =========================================================
     //  3.5 實體化掉落物管理
     // =========================================================
+    // item_type 編碼：0=蘋果  1=香蕉  2=炸彈  3=時鐘
     wire item_active; wire [2:0] item_lane; wire [1:0] item_type; wire [9:0] item_y;
-    wire [9:0] item_x = (item_lane == 3'd0) ? 10'd160 : (item_lane == 3'd1) ? 10'd240 :
+    wire [9:0] item_x = (item_lane == 3'd0) ? 10'd160 : (item_lane == 3'd1) ? 10'd240 :  // 5 條軌道的 X 座標
                         (item_lane == 3'd2) ? 10'd320 : (item_lane == 3'd3) ? 10'd400 : 10'd480;
 
+    // 分數（BCD 位數 s3 s2 s1 s0）換算等級，約略每 50 分升一級，交給 item_manager 動態調難度
     wire [6:0] current_level = (s3 * 7'd20) + (s2 * 7'd2) + (s1 >= 4'd5 ? 7'd1 : 7'd0);
     wire x_overlap = (player_x + 10'd32 > item_x) && (player_x < item_x + 10'd32);
     wire y_overlap = (player_y + 10'd32 > item_y) && (player_y < item_y + 10'd32);
@@ -133,6 +135,8 @@ module TOP(
     //  3.8 ROM 影像模組讀取
     // =========================================================
     wire inside_item = (h_cnt >= item_x && h_cnt < item_x + 10'd32) && (v_cnt >= item_y && v_cnt < item_y + 10'd32);
+    // 把電子槍目前掃到的 (h_cnt,v_cnt) 換算成 32x32 點陣圖內的相對座標，
+    // 再攤平成線性 ROM 位址（row-major：y*寬度 + x）
     wire [9:0] rom_addr = inside_item ? ((h_cnt - item_x) + ((v_cnt - item_y) * 10'd32)) : 10'd0;
     wire [11:0] rom_q_apple, rom_q_banana, rom_q_bomb, rom_q_clock;
     apple  u_apple  (.address(rom_addr), .clock(VGA_CLK), .q(rom_q_apple));
@@ -160,6 +164,8 @@ module TOP(
         else if (frame_pulse && (current_state == STATE_PLAY)) begin
             if (hurt_timer > 0) hurt_timer <= hurt_timer - 6'd1;
             if (hit_bomb && hurt_timer == 0) begin hp <= hp - 3'd1; hurt_timer <= 6'd60; end
+            // 分數只會是 5 的倍數，所以 s0（個位數）只需要在 0/5 之間切換即可，
+            // 逢 5 再進位到十位數 s1；s1/s2/s3 則是正常的十進位 BCD 進位
             if (add_5) begin
                 if (s0 == 4'd5) begin s0 <= 4'd0; if (s1 == 4'd9) begin s1 <= 4'd0; if (s2 == 4'd9) begin s2 <= 4'd0; s3 <= s3 + 1; end else s2 <= s2 + 1; end else s1 <= s1 + 1; end else s0 <= 4'd5;
             end else if (add_10) begin
@@ -275,10 +281,12 @@ module TOP(
 
     // =========================================================
     //  6. 畫面色彩渲染
+    //  以下是優先權編碼器：由上而下第一個成立的條件就決定當前像素顏色，
+    //  所以「UI 疊加層」要寫在「場景物件」前面，才能蓋在遊戲畫面最上層
     // =========================================================
     always @(posedge VGA_CLK or negedge reset_n) begin
         if(!reset_n) {VGA_R, VGA_G, VGA_B} <= 24'h000000;
-        else if (!video_on) {VGA_R, VGA_G, VGA_B} <= 24'h000000; 
+        else if (!video_on) {VGA_R, VGA_G, VGA_B} <= 24'h000000;
         else begin
             if (draw_press_vga)          {VGA_R, VGA_G, VGA_B} <= 24'h00FFFF; 
             else if (draw_end_text)      {VGA_R, VGA_G, VGA_B} <= 24'hFF0000; 
@@ -298,6 +306,8 @@ module TOP(
                 if (game_over) begin
                     {VGA_R, VGA_G, VGA_B} <= 24'h555555; 
                 end else if (player_blink_visible) begin
+                    // 12'hF0F（磁紅色）是轉檔時約定的去背色，讀到就代表這個像素是「背景」，
+                    // 改畫草地/天空，而不是點陣圖本身的顏色
                     if (rom_q_player != 12'hF0F) begin
                         {VGA_R, VGA_G, VGA_B} <= {rom_q_player[11:8], 4'h0, rom_q_player[7:4], 4'h0, rom_q_player[3:0], 4'h0};
                     end else begin
