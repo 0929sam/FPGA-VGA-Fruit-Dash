@@ -47,6 +47,21 @@ VGA 時序與 FSM 遊戲狀態機、簡易物理引擎、LFSR 動態難度調配
 
 ---
 
+## 📊 編譯結果 (Compilation Report)
+
+<img src="docs/media/resource_utilization.png" width="480" alt="Quartus Flow Summary">
+
+| 項目 | 數值 |
+| :--- | :--- |
+| Flow Status | Successful |
+| Device | Cyclone V, `5CSXFC6D6F31C6` |
+| Logic utilization (ALMs) | 904 / 41,910（2%） |
+| Total registers | 1,393 |
+| Total block memory bits | 962,560 / 5,662,720（17%） |
+| Total PLLs | 1 / 15（7%） |
+
+---
+
 ## 🏛️ 系統架構 (System Architecture)
 
 ```mermaid
@@ -141,6 +156,17 @@ flowchart TB
 轉檔流程：照片 → Python 腳本將 24-bit 色彩壓縮成 FPGA 好處理的 **12-bit RGB444**，並用飽和度/亮度
 容差判定把背景棋盤格或雜色邊緣全部強制抹成純磁紅色（`12'hF0F`）當作去背色 → 輸出 `.mif` 記憶體
 初始檔 → 燒錄進 Quartus `altsyncram` ROM IP → RTL 讀到磁紅色就自動透出背景，讀到其他值就直接輸出點陣圖色彩。
+
+---
+
+## 📸 實機畫面 (Screenshots)
+
+<table>
+<tr>
+<td align="center"><img src="docs/media/start_screen.png" width="360"><br>開始畫面</td>
+<td align="center"><img src="docs/media/gameover_screen.png" width="360"><br>結算畫面</td>
+</tr>
+</table>
 
 ---
 
