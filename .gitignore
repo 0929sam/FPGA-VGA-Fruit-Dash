@@ -24,6 +24,5 @@ c5_pin_model_dump.txt
 .DS_Store
 Thumbs.db
 
-# Large raw video (convert to a short GIF/MP4 clip for docs/ instead)
-*.mov
-*.mp4
+# Raw phone footage over ~100MB (GitHub's hard file-size limit) — trim/compress before adding
+IMG_8431.MOV

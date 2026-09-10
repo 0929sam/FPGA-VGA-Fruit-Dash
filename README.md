@@ -75,11 +75,14 @@ flowchart TB
 - 若方塊掉出畫面底部仍未被擊中，視為漏接，連擊歸零
 - 分數同時顯示在畫面左上角（VGA 繪製）與板上七段顯示器；連擊顯示在畫面右上角
 
+📹 **實機 Demo 影片**(點檔名可在 GitHub 上直接線上播放):
+- [docs/media/IMG_8434.mov](docs/media/IMG_8434.mov)
+- [docs/media/IMG_8435.mov](docs/media/IMG_8435.mov)
+
 <!--
-📸 demo 截圖／動圖待補：
-建議從 IMG_8434.mov 或 IMG_8435.mov 截一張遊戲畫面，存成 docs/gameplay.png，
-或用線上工具（例如 ezgif.com/video-to-gif）把影片剪成 5~8 秒的 docs/demo.gif，
-存好後把下面這行的註解拿掉即可自動顯示：
+📸 更輕量的動圖/截圖仍待補：
+建議用線上工具（例如 ezgif.com/video-to-gif）把上面任一支影片剪成 5~8 秒的 docs/demo.gif，
+放在 README 最上方最吸睛（教授不用點擊、直接自動播放）。存好後把下面這行的註解拿掉即可自動顯示：
 
 ![Gameplay Demo](docs/demo.gif)
 -->
