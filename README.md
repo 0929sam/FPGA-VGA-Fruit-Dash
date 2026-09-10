@@ -75,9 +75,10 @@ flowchart TB
 - 若方塊掉出畫面底部仍未被擊中，視為漏接，連擊歸零
 - 分數同時顯示在畫面左上角（VGA 繪製）與板上七段顯示器；連擊顯示在畫面右上角
 
-📹 **實機 Demo 影片**(點檔名可在 GitHub 上直接線上播放):
-- [docs/media/IMG_8434.mov](docs/media/IMG_8434.mov)
-- [docs/media/IMG_8435.mov](docs/media/IMG_8435.mov)
+📹 **實機 Demo 影片**:
+- [docs/media/IMG_8431.mp4](docs/media/IMG_8431.mp4)（已壓縮，約 9MB，GitHub 網頁可直接線上播放）
+- [docs/media/IMG_8434.mov](docs/media/IMG_8434.mov)（原始檔約 39MB，檔案較大，GitHub 網頁無法預覽，點進去後按 `View raw` 下載觀看）
+- [docs/media/IMG_8435.mov](docs/media/IMG_8435.mov)（原始檔約 23MB，同上，需下載觀看）
 
 <!--
 📸 更輕量的動圖/截圖仍待補：
