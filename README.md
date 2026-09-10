@@ -27,7 +27,7 @@ VGA 時序與 FSM 遊戲狀態機、簡易物理引擎、LFSR 動態難度調配
 - 🎲 動態難度系統：16-bit LFSR 偽亂數驅動掉落物種類/軌道，速度與炸彈機率隨等級即時調高
 - 🖼️ 真實照片轉點陣圖：12-bit RGB444 ROM + 磁紅色去背，讓角色道具無縫疊在背景上
 - 🔍 內嵌 SignalTap 邏輯分析儀節點，可即時擷取 VGA 時序與按鍵訊號除錯
-- 🏆 跨局保存的前五名排行榜，結算畫面依名次彩色分階顯示
+- 🏆 跨局保存的前三名排行榜，結算畫面依名次彩色分階顯示
 
 ---
 
@@ -72,7 +72,7 @@ flowchart TB
     PC -- player_x, player_y --> HIT{{AABB 碰撞偵測}}
     IM -- lane, type, y_pos --> HIT
 
-    HIT -- 加分 / 扣血 / 加秒 --> STATE[("分數 s0-s3 / HP / 倒數時間\n前五名排行榜 h1-h5")]
+    HIT -- 加分 / 扣血 / 加秒 --> STATE[("分數 s0-s3 / HP / 倒數時間\n前三名排行榜 h1-h5")]
 
     ROM[("Sprite ROM IP\naltsyncram，12-bit RGB444\napple/banana/bomb/clock/people")]
     PC -.player 位置.-> ROM
@@ -89,7 +89,7 @@ flowchart TB
 
 | 檔案 | 說明 |
 | :--- | :--- |
-| [`TOP.v`](rtl/TOP.v) | 頂層模組：VGA 時序、遊戲狀態機（START/PLAY/GAMEOVER）、碰撞判定、計分/血量/倒數邏輯、前五名排行榜、畫面渲染整合 |
+| [`TOP.v`](rtl/TOP.v) | 頂層模組：VGA 時序、遊戲狀態機（START/PLAY/GAMEOVER）、碰撞判定、計分/血量/倒數邏輯、前三名排行榜、畫面渲染整合 |
 | [`clk_gen.v`](rtl/clk_gen.v) | PLL IP wrapper，50 MHz → 25.175 MHz VGA 像素時脈 |
 | [`player_ctrl.v`](rtl/player_ctrl.v) | 玩家物理引擎：左右移動、下沿偵測觸發的瞬間衝刺（40px）、拋物線重力跳躍 |
 | [`item_manager.v`](rtl/item_manager.v) | 掉落物管理：呼叫 `lfsr_16` 決定軌道與種類，依當前等級動態調整掉落速度與炸彈生成機率 |
@@ -180,8 +180,6 @@ FPGA-VGA-Fruit-Dash/
   之後可以接 EEPROM/Flash 做真正跨電源的持久化儲存
 - **分數用獨立 BCD 位數暫存器手動進位**：目前 `s0`~`s3` 各自處理進位邏輯，之後可以改用通用的
   Double Dabble（shift-add-3）演算法，讓二進位轉 BCD 更容易擴充位數
-- **缺少對應目前腳位的 testbench**：手上原本的模擬環境是舊版介面留下來的，跟現在的 `TOP.v`
-  埠列對不上，之後想加自動化驗證的話需要重寫一份
 
 ---
 
