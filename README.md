@@ -4,13 +4,15 @@
 ![Language](https://img.shields.io/badge/Language-Verilog%20HDL-informational)
 ![Toolchain](https://img.shields.io/badge/Toolchain-Intel%20Quartus%20Prime-orange)
 ![Display](https://img.shields.io/badge/Display-VGA%20640x480%4060Hz-brightgreen)
+![Timeline](https://img.shields.io/badge/Timeline-2026%20Junior%20Year%20Spring-lightgrey)
 
 ![Gameplay Demo](docs/media/demo.gif)
 
 ## 📌 專案簡介 (Overview)
 
-本專案在 **Terasic DE10-Standard**（Intel Cyclone V SX, `5CSXFC6D6F31C6`）開發板上，
-以純手刻 **Verilog RTL** 實作一款帶物理引擎的生存類接物遊戲：主角可左右移動、拋物線跳躍、
+本專案完成於 **2026 年、大三下學期**，在 **Terasic DE10-Standard**（Intel Cyclone V SX,
+`5CSXFC6D6F31C6`）開發板上，以純手刻 **Verilog RTL** 實作一款帶物理引擎的生存類接物遊戲：
+主角可左右移動、拋物線跳躍、
 瞬間衝刺，畫面上方隨機掉落蘋果（+5 分）、香蕉（+10 分）、時鐘（+5 秒）與炸彈（扣 1 滴血），
 接到炸彈會觸發 1 秒無敵閃爍，時間或血量歸零則進入結算畫面並顯示本機前三名排行榜。
 
@@ -220,6 +222,6 @@ FPGA-VGA-Fruit-Dash/
 
 ## 👤 作者 (Author)
 
-**CHEN SHUO HU**
+**CHEN SHUO HU**（大三下，2026）
 
 RTL、VGA 時序、遊戲邏輯與素材轉檔管線皆為個人獨立設計與實作。
