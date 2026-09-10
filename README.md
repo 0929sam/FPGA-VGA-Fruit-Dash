@@ -5,6 +5,8 @@
 ![Toolchain](https://img.shields.io/badge/Toolchain-Intel%20Quartus%20Prime-orange)
 ![Display](https://img.shields.io/badge/Display-VGA%20640x480%4060Hz-brightgreen)
 
+![Gameplay Demo](docs/media/demo.gif)
+
 ## 📌 專案簡介 (Overview)
 
 本專案在 **Terasic DE10-Standard**（Intel Cyclone V SX, `5CSXFC6D6F31C6`）開發板上，
@@ -75,18 +77,11 @@ flowchart TB
 - 若方塊掉出畫面底部仍未被擊中，視為漏接，連擊歸零
 - 分數同時顯示在畫面左上角（VGA 繪製）與板上七段顯示器；連擊顯示在畫面右上角
 
-📹 **實機 Demo 影片**:
-- [docs/media/IMG_8431.mp4](docs/media/IMG_8431.mp4)（已壓縮，約 9MB，GitHub 網頁可直接線上播放）
-- [docs/media/IMG_8434.mov](docs/media/IMG_8434.mov)（原始檔約 39MB，檔案較大，GitHub 網頁無法預覽，點進去後按 `View raw` 下載觀看）
-- [docs/media/IMG_8435.mov](docs/media/IMG_8435.mov)（原始檔約 23MB，同上，需下載觀看）
-
-<!--
-📸 更輕量的動圖/截圖仍待補：
-建議用線上工具（例如 ezgif.com/video-to-gif）把上面任一支影片剪成 5~8 秒的 docs/demo.gif，
-放在 README 最上方最吸睛（教授不用點擊、直接自動播放）。存好後把下面這行的註解拿掉即可自動顯示：
-
-![Gameplay Demo](docs/demo.gif)
--->
+開頭的動圖是實機錄影剪出來的 6 秒精華（會自動播放）。完整版影片如下，GitHub 網頁不會內嵌播放，
+點進去後要按 `View raw` 下載到本機用播放器看：
+- [docs/media/IMG_8431.mp4](docs/media/IMG_8431.mp4)（已壓縮，約 9MB）
+- [docs/media/IMG_8434.mov](docs/media/IMG_8434.mov)（原始檔約 39MB）
+- [docs/media/IMG_8435.mov](docs/media/IMG_8435.mov)（原始檔約 23MB）
 
 ---
 
