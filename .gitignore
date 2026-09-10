@@ -1,0 +1,29 @@
+# Quartus compilation output / generated cache (regenerate with Quartus, don't commit)
+db/
+incremental_db/
+output_files/
+simulation/
+*_sim/
+*.qws
+*.rpt
+*.summary
+*.smsg
+*.sld
+*.pin
+*.jdi
+*.done
+*.qarlog
+*.htm
+c5_pin_model_dump.txt
+
+# Editor / backup files
+*.bak
+*~
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Large raw video (convert to a short GIF/MP4 clip for docs/ instead)
+*.mov
+*.mp4
